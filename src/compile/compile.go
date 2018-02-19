@@ -19,13 +19,14 @@ type Runner interface {
 
 // MultiCompiler a struct to compile this buildpack
 type MultiCompiler struct {
-	BuildDir         string
-	CacheDir         string
-	Log              *libbuildpack.Logger
-	Buildpacks       []string
-	DownloadsDir     string
-	Runner           Runner
-	ExistingDepsDirs []string
+	BuildDir           string
+	CacheDir           string
+	Log                *libbuildpack.Logger
+	Buildpacks         []string
+	DownloadsDir       string
+	Runner             Runner
+	ExistingDepsDirs   []string
+	AdditionalCommands []string
 }
 
 func main() {
@@ -49,12 +50,12 @@ func main() {
 		os.Exit(10)
 	}
 
-	buildpacks, err := GetBuildpacks(stager.BuildDir(), logger)
+	buildpacks, additionalCommands, err := GetBuildpacks(stager.BuildDir(), logger)
 	if err != nil {
 		os.Exit(11)
 	}
 
-	mc, err := NewMultiCompiler(stager.BuildDir(), stager.CacheDir(), buildpacks, logger)
+	mc, err := NewMultiCompiler(stager.BuildDir(), stager.CacheDir(), buildpacks, additionalCommands, logger)
 	if err != nil {
 		os.Exit(12)
 	}
@@ -68,19 +69,20 @@ func main() {
 }
 
 // NewMultiCompiler creates a new MultiCompiler
-func NewMultiCompiler(buildDir, cacheDir string, buildpacks []string, logger *libbuildpack.Logger) (*MultiCompiler, error) {
+func NewMultiCompiler(buildDir, cacheDir string, buildpacks []string, additionalCommands []string, logger *libbuildpack.Logger) (*MultiCompiler, error) {
 	downloadsDir, err := ioutil.TempDir("", "downloads")
 	if err != nil {
 		return nil, err
 	}
 	mc := &MultiCompiler{
-		BuildDir:         buildDir,
-		CacheDir:         cacheDir,
-		Buildpacks:       buildpacks,
-		DownloadsDir:     downloadsDir,
-		Log:              logger,
-		Runner:           nil,
-		ExistingDepsDirs: []string{},
+		BuildDir:           buildDir,
+		CacheDir:           cacheDir,
+		Buildpacks:         buildpacks,
+		DownloadsDir:       downloadsDir,
+		Log:                logger,
+		Runner:             nil,
+		ExistingDepsDirs:   []string{},
+		AdditionalCommands: additionalCommands,
 	}
 	return mc, nil
 }
@@ -107,7 +109,7 @@ func (c *MultiCompiler) Compile() error {
 		return err
 	}
 
-	err = WriteStartCommand(stagingInfoFile, "/tmp/multi-buildpack-release.yml")
+	err = WriteStartCommand(stagingInfoFile, "/tmp/multi-buildpack-release.yml", c.AdditionalCommands)
 	if err != nil {
 		c.Log.Error("Unable to write start command: %s", err.Error())
 		return err

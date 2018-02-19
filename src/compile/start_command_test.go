@@ -18,6 +18,8 @@ var _ = Describe("WriteStartCommand", func() {
 		outputDir       string
 		outputFile      string
 		err             error
+		buildDir        string
+		profileFile     string
 	)
 
 	BeforeEach(func() {
@@ -28,6 +30,11 @@ var _ = Describe("WriteStartCommand", func() {
 		outputDir, err = ioutil.TempDir("", "release")
 		Expect(err).To(BeNil())
 		outputFile = filepath.Join(outputDir, "multi-buildpack-release.yml")
+
+		buildDir, err = ioutil.TempDir("", "build")
+		Expect(err).To(BeNil())
+		os.Setenv("BUILD_DIR", buildDir)
+		profileFile = filepath.Join(buildDir, "Procfile")
 	})
 
 	AfterEach(func() {
@@ -35,6 +42,9 @@ var _ = Describe("WriteStartCommand", func() {
 		Expect(err).To(BeNil())
 
 		err = os.RemoveAll(outputDir)
+		Expect(err).To(BeNil())
+
+		err = os.RemoveAll(buildDir)
 		Expect(err).To(BeNil())
 	})
 
@@ -46,13 +56,28 @@ var _ = Describe("WriteStartCommand", func() {
 		})
 
 		It("writes the intended release output to multi-buildpack-release.yml ", func() {
-			err = c.WriteStartCommand(stagingInfoFile, outputFile)
+			err = c.WriteStartCommand(stagingInfoFile, outputFile, nil)
 
 			Expect(err).To(BeNil())
 
 			data, err := ioutil.ReadFile(outputFile)
 			Expect(err).To(BeNil())
 			Expect(string(data)).To(Equal("default_process_types:\n  web: run_thing arg1 arg2\n"))
+			Expect(profileFile).NotTo(BeAnExistingFile())
+		})
+
+		It("writes the intended release output to multi-buildpack-release.yml ", func() {
+			err = c.WriteStartCommand(stagingInfoFile, outputFile, []string{"foo", "bar"})
+
+			Expect(err).To(BeNil())
+
+			data, err := ioutil.ReadFile(outputFile)
+			Expect(err).To(BeNil())
+			Expect(string(data)).To(Equal("default_process_types:\n  web: ./bin/forego start\n"))
+
+			data, err = ioutil.ReadFile(profileFile)
+			Expect(err).To(BeNil())
+			Expect(string(data)).To(Equal("proc_1: foo\nproc_2: bar\nmain: run_thing arg1 arg2\n"))
 		})
 	})
 
@@ -64,7 +89,7 @@ var _ = Describe("WriteStartCommand", func() {
 		})
 
 		It("returns an error", func() {
-			err = c.WriteStartCommand(stagingInfoFile, outputFile)
+			err = c.WriteStartCommand(stagingInfoFile, outputFile, nil)
 
 			Expect(err).NotTo(BeNil())
 		})
@@ -72,7 +97,7 @@ var _ = Describe("WriteStartCommand", func() {
 
 	Context("staging_info.yml does not exist", func() {
 		It("returns an error", func() {
-			err = c.WriteStartCommand(stagingInfoFile, outputFile)
+			err = c.WriteStartCommand(stagingInfoFile, outputFile, nil)
 
 			Expect(err).NotTo(BeNil())
 		})

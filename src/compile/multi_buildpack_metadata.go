@@ -7,13 +7,16 @@ import (
 	"github.com/cloudfoundry/libbuildpack"
 )
 
-// Config is a struct to parse multi-buildpack.yml
+// MultiBuildpackMetadata is a struct to parse multi-buildpack.yml
 type MultiBuildpackMetadata struct {
 	Buildpacks []string `yaml:"buildpacks"`
+
+	// additional Commands for start command
+	AdditionalCommands []string `yaml:"additionalCommands"`
 }
 
-// NewConfig returns parsed config object
-func GetBuildpacks(dir string, logger *libbuildpack.Logger) ([]string, error) {
+// returns list of buildpacks and additional commands
+func GetBuildpacks(dir string, logger *libbuildpack.Logger) ([]string, []string, error) {
 	metadata := &MultiBuildpackMetadata{}
 
 	err := libbuildpack.NewYAML().Load(filepath.Join(dir, "multi-buildpack.yml"), metadata)
@@ -23,8 +26,8 @@ func GetBuildpacks(dir string, logger *libbuildpack.Logger) ([]string, error) {
 		} else {
 			logger.Error("The multi-buildpack.yml file is malformed.")
 		}
-		return nil, err
+		return nil, nil, err
 	}
 
-	return metadata.Buildpacks, nil
+	return metadata.Buildpacks, metadata.AdditionalCommands, nil
 }

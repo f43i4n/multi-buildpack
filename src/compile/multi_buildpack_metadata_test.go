@@ -16,6 +16,7 @@ import (
 var _ = Describe("GetBuildpacks", func() {
 	var (
 		buildpacks []string
+		commands   []string
 		buildDir   string
 		err        error
 		buffer     *bytes.Buffer
@@ -43,7 +44,7 @@ var _ = Describe("GetBuildpacks", func() {
 		})
 
 		It("returns the list of buildpacks provided in multi-buildpack.yml", func() {
-			buildpacks, err = c.GetBuildpacks(buildDir, logger)
+			buildpacks, _, err = c.GetBuildpacks(buildDir, logger)
 
 			Expect(err).To(BeNil())
 			Expect(buildpacks).To(Equal([]string{"some-buildpack", "some-other-buildpack"}))
@@ -58,7 +59,7 @@ var _ = Describe("GetBuildpacks", func() {
 		})
 
 		It("returns an error", func() {
-			_, err := c.GetBuildpacks(buildDir, logger)
+			_, _, err := c.GetBuildpacks(buildDir, logger)
 			Expect(err).ToNot(BeNil())
 		})
 
@@ -70,13 +71,29 @@ var _ = Describe("GetBuildpacks", func() {
 
 	Context("multi-buildpack.yml does not exist", func() {
 		It("returns an error", func() {
-			_, err := c.GetBuildpacks(buildDir, logger)
+			_, _, err := c.GetBuildpacks(buildDir, logger)
 			Expect(err).ToNot(BeNil())
 		})
 
 		It("informs the user", func() {
 			c.GetBuildpacks(buildDir, logger)
 			Expect(buffer.String()).To(ContainSubstring("A multi-buildpack.yml file must be provided at your app root to use this buildpack."))
+		})
+	})
+
+	Context("multi-buildpack.yml contains additional Commands", func() {
+		BeforeEach(func() {
+			content := "buildpacks:\n- some-buildpack\n- some-other-buildpack\nadditionalCommands:\n- foo\n- bar"
+			err = ioutil.WriteFile(filepath.Join(buildDir, "multi-buildpack.yml"), []byte(content), 0444)
+			Expect(err).To(BeNil())
+		})
+
+		It("returns the list of buildpacks provided in multi-buildpack.yml", func() {
+			buildpacks, commands, err = c.GetBuildpacks(buildDir, logger)
+
+			Expect(err).To(BeNil())
+			Expect(buildpacks).To(Equal([]string{"some-buildpack", "some-other-buildpack"}))
+			Expect(commands).To(Equal([]string{"foo", "bar"}))
 		})
 	})
 })
