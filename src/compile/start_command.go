@@ -11,7 +11,7 @@ import (
 
 func writeProcfile(mainCommand string, additionalCommands []string) error {
 	buildDir := os.Args[1]
-	procfile := path.Join(buildDir, "Procfile")
+	procfile := path.Join(buildDir, "multi_procfile")
 
 	f, err := os.Create(procfile)
 	if err != nil {
@@ -49,7 +49,7 @@ func WriteStartCommand(stagingInfoFile string, outputFile string, additionalComm
 		}
 
 		webStartCommand = map[string]string{
-			"web": "./bin/forego start",
+			"web": "./bin/forego start -f multi_procfile",
 		}
 	} else {
 

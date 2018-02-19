@@ -34,7 +34,7 @@ var _ = Describe("WriteStartCommand", func() {
 		buildDir, err = ioutil.TempDir("", "build")
 		Expect(err).To(BeNil())
 		os.Args[1] = buildDir
-		profileFile = filepath.Join(buildDir, "Procfile")
+		profileFile = filepath.Join(buildDir, "multi_procfile")
 	})
 
 	AfterEach(func() {
@@ -73,7 +73,7 @@ var _ = Describe("WriteStartCommand", func() {
 
 			data, err := ioutil.ReadFile(outputFile)
 			Expect(err).To(BeNil())
-			Expect(string(data)).To(Equal("default_process_types:\n  web: ./bin/forego start\n"))
+			Expect(string(data)).To(Equal("default_process_types:\n  web: ./bin/forego start -f multi_procfile\n"))
 
 			data, err = ioutil.ReadFile(profileFile)
 			Expect(err).To(BeNil())
