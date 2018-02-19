@@ -11,9 +11,9 @@ output_dir=$(mktemp -d -t compileXXX)
 echo "-----> Running go build compile"
 GOROOT=$GoInstallDir/go GOPATH=$BUILDPACK_DIR $GoInstallDir/go/bin/go build -o $output_dir/compile compile
 
+$output_dir/compile "$BUILD_DIR" "$CACHE_DIR"
+
 echo "-----> Building forego"
 GOROOT=$GoInstallDir/go GOPATH=$BUILDPACK_DIR $GoInstallDir/go/bin/go get -u github.com/ddollar/forego
 mkdir -p $BUILD_DIR/bin
 cp $BUILDPACK_DIR/bin/forego $BUILD_DIR/bin/forego
-
-$output_dir/compile "$BUILD_DIR" "$CACHE_DIR"
