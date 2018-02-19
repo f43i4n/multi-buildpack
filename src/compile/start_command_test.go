@@ -67,7 +67,7 @@ var _ = Describe("WriteStartCommand", func() {
 		})
 
 		It("writes the intended release output to multi-buildpack-release.yml ", func() {
-			err = c.WriteStartCommand(stagingInfoFile, outputFile, []string{"foo", "bar"})
+			err = c.WriteStartCommand(stagingInfoFile, outputFile, []string{"foo \"test\"", "bar"})
 
 			Expect(err).To(BeNil())
 
@@ -77,7 +77,7 @@ var _ = Describe("WriteStartCommand", func() {
 
 			data, err = ioutil.ReadFile(profileFile)
 			Expect(err).To(BeNil())
-			Expect(string(data)).To(Equal("proc_1: bash -c \"foo\"\nproc_2: bash -c \"bar\"\nmain: bash -c \"run_thing arg1 arg2\"\n"))
+			Expect(string(data)).To(Equal("proc_1: bash -c \"foo \\\"test\\\"\"\nproc_2: bash -c \"bar\"\nmain: bash -c \"run_thing arg1 arg2\"\n"))
 		})
 	})
 

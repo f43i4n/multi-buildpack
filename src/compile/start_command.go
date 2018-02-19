@@ -4,10 +4,18 @@ import (
 	"fmt"
 	"os"
 	"path"
+	"strings"
 
 	"code.cloudfoundry.org/buildpackapplifecycle/buildpackrunner"
 	"github.com/cloudfoundry/libbuildpack"
 )
+
+func writeProfileLine(file *os.File, name string, command string) error {
+	// escape "
+	command = strings.Replace(command, "\"", "\\\"", -1)
+	_, err := file.WriteString(fmt.Sprintf("%v: bash -c \"%v\"\n", name, command))
+	return err
+}
 
 func writeProcfile(mainCommand string, additionalCommands []string) error {
 	buildDir := os.Args[1]
@@ -20,13 +28,13 @@ func writeProcfile(mainCommand string, additionalCommands []string) error {
 	defer f.Close()
 
 	for i, cmd := range additionalCommands {
-		_, err = f.WriteString(fmt.Sprintf("proc_%v: bash -c \"%v\"\n", i+1, cmd))
+		err = writeProfileLine(f, fmt.Sprintf("proc_%v", i+1), cmd)
 		if err != nil {
 			return err
 		}
 	}
 
-	_, err = f.WriteString(fmt.Sprintf("main: bash -c \"%v\"\n", mainCommand))
+	err = writeProfileLine(f, "main", mainCommand)
 	if err != nil {
 		return err
 	}
