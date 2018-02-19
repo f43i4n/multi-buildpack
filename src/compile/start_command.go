@@ -10,7 +10,7 @@ import (
 )
 
 func writeProcfile(mainCommand string, additionalCommands []string) error {
-	buildDir := os.Getenv("BUILD_DIR")
+	buildDir := os.Args[1]
 	procfile := path.Join(buildDir, "Procfile")
 
 	f, err := os.Create(procfile)

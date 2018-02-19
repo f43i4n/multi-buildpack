@@ -33,7 +33,7 @@ var _ = Describe("WriteStartCommand", func() {
 
 		buildDir, err = ioutil.TempDir("", "build")
 		Expect(err).To(BeNil())
-		os.Setenv("BUILD_DIR", buildDir)
+		os.Args[1] = buildDir
 		profileFile = filepath.Join(buildDir, "Procfile")
 	})
 
