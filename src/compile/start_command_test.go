@@ -77,7 +77,7 @@ var _ = Describe("WriteStartCommand", func() {
 
 			data, err = ioutil.ReadFile(profileFile)
 			Expect(err).To(BeNil())
-			Expect(string(data)).To(Equal("proc_1: foo\nproc_2: bar\nmain: run_thing arg1 arg2\n"))
+			Expect(string(data)).To(Equal("proc_1: bash -c \"foo\"\nproc_2: bash -c \"bar\"\nmain: bash -c \"run_thing arg1 arg2\"\n"))
 		})
 	})
 

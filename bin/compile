@@ -13,6 +13,9 @@ GOROOT=$GoInstallDir/go GOPATH=$BUILDPACK_DIR $GoInstallDir/go/bin/go build -o $
 
 $output_dir/compile "$BUILD_DIR" "$CACHE_DIR"
 
+echo "contents of multi_procfile"
+cat $BUILD_DIR/multi_procfile
+
 echo "-----> Building forego"
 GOROOT=$GoInstallDir/go GOPATH=$BUILDPACK_DIR $GoInstallDir/go/bin/go get -u github.com/ddollar/forego
 mkdir -p $BUILD_DIR/bin

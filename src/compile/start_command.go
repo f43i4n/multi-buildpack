@@ -20,13 +20,13 @@ func writeProcfile(mainCommand string, additionalCommands []string) error {
 	defer f.Close()
 
 	for i, cmd := range additionalCommands {
-		_, err = f.WriteString(fmt.Sprintf("proc_%v: %v\n", i+1, cmd))
+		_, err = f.WriteString(fmt.Sprintf("proc_%v: bash -c \"%v\"\n", i+1, cmd))
 		if err != nil {
 			return err
 		}
 	}
 
-	_, err = f.WriteString(fmt.Sprintf("main: %v\n", mainCommand))
+	_, err = f.WriteString(fmt.Sprintf("main: bash -c \"%v\"\n", mainCommand))
 	if err != nil {
 		return err
 	}
