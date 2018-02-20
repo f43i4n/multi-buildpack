@@ -4,16 +4,14 @@ import (
 	"fmt"
 	"os"
 	"path"
-	"strings"
 
 	"code.cloudfoundry.org/buildpackapplifecycle/buildpackrunner"
 	"github.com/cloudfoundry/libbuildpack"
 )
 
 func writeProfileLine(file *os.File, name string, command string) error {
-	// escape "
-	command = strings.Replace(command, "\"", "\\\"", -1)
-	_, err := file.WriteString(fmt.Sprintf("%v: bash -c \"%v\"\n", name, command))
+
+	_, err := file.WriteString(fmt.Sprintf("%v: bash -c '%v'\n", name, command))
 	return err
 }
 
